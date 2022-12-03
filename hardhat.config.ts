@@ -14,7 +14,6 @@ function getNetwork1(url: string): { url: string; accounts: any } {
     // accounts: { mnemonic },
     accounts: {
       mnemonic: mnemonic,
-      initialIndex: 1,
     },
   }
 }

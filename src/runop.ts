@@ -10,8 +10,8 @@ import { Greeter__factory } from '../types/factories/contracts/Greeter__factory'
 import { MyPaymasterApi } from './MyPaymasterApi'
 
 /** Contracts deployed on goerli network */
-// const ENTRYPOINT_ADDR = '0x2167fA17BA3c80Adee05D98F0B55b666Be6829d6'
-const ENTRYPOINT_ADDR = '0x2DF1592238420ecFe7f2431360e224707e77fA0E'
+const ENTRYPOINT_ADDR = '0x2167fA17BA3c80Adee05D98F0B55b666Be6829d6'
+// const ENTRYPOINT_ADDR = '0x2DF1592238420ecFe7f2431360e224707e77fA0E'
 
 const runop = async () => {
   console.log('--- starting runop ---')
@@ -27,9 +27,9 @@ const runop = async () => {
 
   const providerConfig = {
     entryPointAddress,
-    // bundlerUrl: 'https://eip4337-bundler-goerli.protonapp.io/rpc',
+    bundlerUrl: 'https://eip4337-bundler-goerli.protonapp.io/rpc',
     // bundlerUrl: 'http://155.248.246.134:3000/rpc',
-    bundlerUrl: 'http://localhost:3000/rpc',
+    // bundlerUrl: 'http://localhost:3000/rpc',
     chainId: network.chainId,
   }
 
@@ -106,8 +106,9 @@ const runop = async () => {
 
   Greeter = Greeter.connect(aaSigner)
 
-  const tx = await Greeter.addGreet({
-    value: ethers.utils.parseEther('0'),
+  const tx = await aaSigner.sendTransaction({
+    to: '0xd52dBd85B950c8bFD4ba4e12800C66D08837609f',
+    value: ethers.utils.parseEther('0.1'),
     gasLimit: 4000000,
   })
 
