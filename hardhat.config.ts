@@ -32,7 +32,7 @@ const config: HardhatUserConfig = {
   solidity: '0.8.17',
   networks: {
     localhost: {
-      url: 'http://155.248.246.134:8545/',
+      url: 'http://localhost:8545/',
     },
     goerli: getNetwork('goerli'),
     mumbai: getNetwork('polygon-mumbai'),
