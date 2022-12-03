@@ -2,7 +2,7 @@ import { BigNumber, BigNumberish } from 'ethers'
 
 import { arrayify, hexConcat } from 'ethers/lib/utils'
 import { Signer } from '@ethersproject/abstract-signer'
-import { MyWallet, MyWalletDeployer, MyWalletDeployer__factory, MyWallet__factory } from './types'
+import { ComplexWallet, ComplexWalletDeployer, ComplexWalletDeployer__factory, ComplexWallet__factory } from '../types'
 import { BaseApiParams, BaseWalletAPI } from '@account-abstraction/sdk/dist/src/BaseWalletAPI'
 import { SimpleWalletAPI } from '@account-abstraction/sdk'
 

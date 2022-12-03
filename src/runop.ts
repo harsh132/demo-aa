@@ -4,28 +4,32 @@ import { ethers } from 'hardhat'
 import { HttpRpcClient } from '@account-abstraction/sdk/dist/src/HttpRpcClient'
 import { ERC4337EthersProvider } from '@account-abstraction/sdk'
 import { MyWalletApi } from '.'
-import { deployments } from 'hardhat';
-import { MyWalletDeployer__factory } from './types'
-import { Greeter__factory } from './types/factories/Greeter__factory'
+import { deployments } from 'hardhat'
+import { ComplexWalletDeployer__factory } from '../types'
+import { Greeter__factory } from '../types/factories/contracts/Greeter__factory'
 import { MyPaymasterApi } from './MyPaymasterApi'
 
-
 /** Contracts deployed on goerli network */
-const ENTRYPOINT_ADDR = '0x2167fA17BA3c80Adee05D98F0B55b666Be6829d6'
+// const ENTRYPOINT_ADDR = '0x2167fA17BA3c80Adee05D98F0B55b666Be6829d6'
+const ENTRYPOINT_ADDR = '0x2DF1592238420ecFe7f2431360e224707e77fA0E'
 
 const runop = async () => {
   console.log('--- starting runop ---')
-  const {deploy} = deployments;
+  const { deploy } = deployments
 
   const originalProvider = ethers.provider
   const orignalSigner = originalProvider.getSigner()
   const network = await originalProvider.getNetwork()
 
+  console.log('Chain :', network.chainId)
+
   const entryPointAddress = ENTRYPOINT_ADDR
 
   const providerConfig = {
     entryPointAddress,
-    bundlerUrl: 'https://eip4337-bundler-goerli.protonapp.io/rpc',
+    // bundlerUrl: 'https://eip4337-bundler-goerli.protonapp.io/rpc',
+    // bundlerUrl: 'http://155.248.246.134:3000/rpc',
+    bundlerUrl: 'http://localhost:3000/rpc',
     chainId: network.chainId,
   }
 
@@ -36,10 +40,12 @@ const runop = async () => {
   console.log('--- deploying Greeter contract ---')
   const Greeter_factory = await ethers.getContractFactory('Greeter', orignalSigner)
 
-  const { address: GreeterAddress } = await deploy("Greeter", {
+  const { address: GreeterAddress } = await deploy('Greeter', {
     from: await orignalSigner.getAddress(),
     gasLimit: 4000000,
-    deterministicDeployment: true
+    maxFeePerGas: '50000000000',
+    maxPriorityFeePerGas: '50000000000',
+    deterministicDeployment: true,
   })
 
   let Greeter = Greeter__factory.connect(GreeterAddress, orignalSigner)
@@ -49,27 +55,27 @@ const runop = async () => {
   /** End Deploy greeter to test */
 
   /** THis is where we create our custom Wallet */
-  console.log('--- deploying MyWalletDeployer contract ---')
+  console.log('--- deploying ComplexWalletDeployer contract ---')
 
-  const { address: MyWalletDeployerAddress } = await deploy('MyWalletDeployer', {
+  const { address: ComplexWalletDeployerAddress } = await deploy('ComplexWalletDeployer', {
     from: await orignalSigner.getAddress(),
     gasLimit: 4000000,
-    deterministicDeployment: true
-  });
+    deterministicDeployment: true,
+  })
 
-  console.log('MyWalletDeployer Address: ', MyWalletDeployerAddress)
+  console.log('ComplexWalletDeployer Address: ', ComplexWalletDeployerAddress)
 
-  const MyWalletDeployer = MyWalletDeployer__factory.connect(MyWalletDeployerAddress, orignalSigner)
-  const factoryAddress = MyWalletDeployer.address
+  const ComplexWalletDeployer = ComplexWalletDeployer__factory.connect(ComplexWalletDeployerAddress, orignalSigner)
+  const factoryAddress = ComplexWalletDeployer.address
 
   console.log('Factory address:', factoryAddress)
 
   const ownerAddress = await orignalSigner.getAddress()
 
-  const walletAddress = await MyWalletDeployer.getDeploymentAddress(entryPointAddress, ownerAddress, 0)
+  const walletAddress = await ComplexWalletDeployer.getDeploymentAddress(entryPointAddress, [ownerAddress], [], '0')
   console.log('--- end deploying MyWalletDeployer contract ---')
 
-  const myPaymasterApi = new MyPaymasterApi();
+  const myPaymasterApi = new MyPaymasterApi()
 
   const smartWalletAPI = new MyWalletApi({
     provider: originalProvider,
@@ -77,7 +83,7 @@ const runop = async () => {
     walletAddress,
     owner: orignalSigner,
     factoryAddress,
-    paymasterAPI: myPaymasterApi
+    paymasterAPI: myPaymasterApi,
   })
 
   /** This marks the end of creation of our custom wallet api */
@@ -102,6 +108,7 @@ const runop = async () => {
 
   const tx = await Greeter.addGreet({
     value: ethers.utils.parseEther('0'),
+    gasLimit: 4000000,
   })
 
   await tx.wait()
